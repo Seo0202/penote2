@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>회차 작성</title></head>
+<body>
+<h1>새 회차 작성</h1>
+<form action="/articles" method="post">
+    <label for="title">회차 제목</label><br>
+    <input type="text" id="title" name="title" required><br><br>
+    <label for="genre">장르</label><br>
+    <select id="genre" name="genre" required>
+        <option value="로맨스">로맨스</option>
+        <option value="추리/스릴러">추리/스릴러</option>
+        <option value="판타지">판타지</option>
+        <option value="기타" selected>기타</option>
+    </select><br><br>
+    <label for="paid">회차 유형</label><br>
+    <select id="paid" name="paid">
+        <option value="false" selected>무료 회차</option>
+        <option value="true">유료 회차 (별 5개)</option>
+    </select><br><br>
+    <label for="content">내용</label><br>
+    <textarea id="content" name="content" rows="10" cols="50" required></textarea><br>
+    <button type="submit">등록</button>
+</form>
+<a href="/articles">회차 목록</a>
+</body></html>

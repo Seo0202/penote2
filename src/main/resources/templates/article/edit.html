@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>회차 수정</title></head>
+<body>
+<h1>회차 수정</h1>
+<form th:action="@{/articles/{id}(id=${article.id})}" method="post">
+    <input type="hidden" name="_method" value="put">
+    <label for="title">회차 제목</label><br>
+    <input type="text" id="title" name="title" th:value="${article.title}" required><br><br>
+    <label for="genre">장르</label><br>
+    <select id="genre" name="genre" required>
+        <option value="로맨스" th:selected="${article.genre == '로맨스'}">로맨스</option>
+        <option value="추리/스릴러" th:selected="${article.genre == '추리/스릴러'}">추리/스릴러</option>
+        <option value="판타지" th:selected="${article.genre == '판타지'}">판타지</option>
+        <option value="기타" th:selected="${article.genre == '기타'}">기타</option>
+    </select><br><br>
+    <label for="paid">회차 유형</label><br>
+    <select id="paid" name="paid">
+        <option value="false" th:selected="${!article.paid}">무료 회차</option>
+        <option value="true" th:selected="${article.paid}">유료 회차 (별 5개)</option>
+    </select><br><br>
+    <label for="content">내용</label><br>
+    <textarea id="content" name="content" rows="10" cols="50" required th:text="${article.content}"></textarea><br>
+    <button type="submit">수정 완료</button>
+</form>
+<a th:href="@{/articles/{id}(id=${article.id})}">회차로 돌아가기</a>
+<a href="/articles">목록으로</a>
+</body></html>

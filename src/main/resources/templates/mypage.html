@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지</title>
+    <style>
+        body { font-family: sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+        .profile-image { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
+        .profile-section { margin-bottom: 24px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+<h1>마이페이지</h1>
+<div class="profile-section">
+    <div th:if="${user_info.profileImageUrl != null}">
+        <img class="profile-image" th:src="${user_info.profileImageUrl}" alt="프로필 사진">
+    </div>
+    <div th:unless="${user_info.profileImageUrl != null}">
+        <p>프로필 사진을 등록해 주세요.</p>
+    </div>
+</div>
+<div class="profile-section">
+    <p>이메일: <span th:text="${user_info.email}"></span></p>
+    <p>닉네임: <span th:text="${user_info.nickname}"></span></p>
+    <p>⭐ 보유 별: <strong th:text="${user_info.starCount}">0</strong>개</p>
+</div>
+<hr>
+<h2>프로필 사진 변경</h2>
+<form th:action="@{/mypage/{id}/profile-image(id=${user_info.id})}" method="post" enctype="multipart/form-data">
+    <input type="file" name="profileImage" accept="image/jpeg,image/png,image/webp" required>
+    <button type="submit">사진 업로드</button>
+</form>
+<hr>
+<h2>내가 구매한 회차</h2>
+<p th:if="${#lists.isEmpty(purchasedEpisodes)}">아직 구매한 회차가 없습니다.</p>
+<table th:unless="${#lists.isEmpty(purchasedEpisodes)}">
+    <thead><tr><th>회차 제목</th><th>장르</th><th>구매일</th><th>읽기</th></tr></thead>
+    <tbody>
+    <tr th:each="episode : ${purchasedEpisodes}">
+        <td th:text="${episode.title}">회차 제목</td>
+        <td th:text="${episode.genre}">기타</td>
+        <td th:text="${#temporals.format(episode.purchasedAt, 'yyyy-MM-dd HH:mm')}">2026-10-27</td>
+        <td><a th:href="@{/articles/{id}(id=${episode.articleId})}">읽기</a></td>
+    </tr>
+    </tbody>
+</table>
+<p><a href="/articles">회차 목록으로</a></p>
+</body></html>

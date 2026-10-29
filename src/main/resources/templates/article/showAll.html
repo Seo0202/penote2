@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>글 목록</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .pagination { display: flex; gap: 6px; margin-top: 20px; align-items: center; }
+        .pagination a, .pagination span {
+            padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px;
+            text-decoration: none; color: #333;
+        }
+        .pagination .active { background-color: #007bff; color: white; border-color: #007bff; }
+        .pagination .disabled { color: #aaa; pointer-events: none; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+        .page-info { color: #666; font-size: 14px; }
+        .search-form { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
+        .search-form input[type="text"] {
+            padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px;
+            width: 220px; font-size: 14px;
+        }
+        .search-form button {
+            padding: 6px 14px; border: 1px solid #007bff; background-color: #007bff;
+            color: white; border-radius: 4px; cursor: pointer; font-size: 14px;
+        }
+        .search-form button:hover { background-color: #0062cc; }
+        .clear-search { font-size: 13px; color: #888; text-decoration: underline; }
+        .sort-link { color: #333; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+        .sort-link:hover { color: #007bff; }
+    </style>
+</head>
+<body>
+<h1>작품 회차 목록</h1>
+<div>
+    <a th:if="${currentUserId != null}" th:href="@{/mypage/{id}(id=${currentUserId})}">마이페이지</a>
+    <a th:unless="${currentUserId != null}" href="/login">로그인</a>
+</div>
+
+<div class="top-bar">
+    <a href="/articles/new">새 글 작성</a>
+    <form class="search-form" th:action="@{/articles}" method="get">
+        <input type="hidden" name="size" th:value="${size}">
+        <input type="hidden" name="sortBy" th:value="${sortBy}">
+        <input type="hidden" name="direction" th:value="${direction}">
+        <input type="text" name="keyword" placeholder="제목 또는 내용 검색" th:value="${keyword}">
+        <button type="submit">검색</button>
+        <a th:if="${keyword != null and !#strings.isEmpty(keyword)}" th:href="@{/articles(size=${size}, sortBy=${sortBy}, direction=${direction})}" class="clear-search">초기화</a>
+    </form>
+    <span class="page-info"
+          th:text="'총 ' + ${articlePage.totalElements} + '개의 글 | ' + (${currentPage} + 1) + ' / ' + ${totalPages} + ' 페이지'">
+    </span>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>
+            <a class="sort-link" th:href="@{/articles(page=0, size=${size}, keyword=${keyword}, sortBy='id', direction=${sortBy == 'id' and direction == 'asc' ? 'desc' : 'asc'})}">
+                ID
+                <span th:if="${sortBy == 'id'}" th:text="${direction == 'asc'} ? '▲' : '▼'"></span>
+            </a>
+        </th>
+        <th>
+            <a class="sort-link" th:href="@{/articles(page=0, size=${size}, keyword=${keyword}, sortBy='title', direction=${sortBy == 'title' and direction == 'asc' ? 'desc' : 'asc'})}">
+                제목
+                <span th:if="${sortBy == 'title'}" th:text="${direction == 'asc'} ? '▲' : '▼'"></span>
+            </a>
+        </th>
+        <th>장르</th>
+        <th>유형</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="article : ${articlePage.content}">
+        <td th:text="${article.id}">1</td>
+        <td>
+            <a th:href="@{/articles/{id}(id=${article.id})}" th:text="${article.title}">제목</a>
+        </td>
+        <td th:text="${article.genre}">기타</td>
+        <td th:text="${article.paid} ? '🔒 유료 (별 5개)' : '무료'">무료</td>
+    </tr>
+    <tr th:if="${articlePage.totalElements == 0 and (keyword == null or #strings.isEmpty(keyword))}">
+        <td colspan="4" style="text-align:center; color:#888;">게시글이 없습니다.</td>
+    </tr>
+    <tr th:if="${articlePage.totalElements == 0 and keyword != null and !#strings.isEmpty(keyword)}">
+        <td colspan="4" style="text-align:center; color:#888;" th:text="'\'' + ${keyword} + '\'에 대한 검색 결과가 없습니다.'"></td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- 페이지 네비게이션 -->
+<div class="pagination" th:if="${totalPages > 1}">
+    <!-- 이전 버튼 -->
+    <a th:if="${currentPage > 0}"
+       th:href="@{/articles(page=${currentPage - 1}, size=${size}, keyword=${keyword}, sortBy=${sortBy}, direction=${direction})}">이전</a>
+    <span th:if="${currentPage == 0}" class="disabled">이전</span>
+
+    <!-- 페이지 번호 (현재 페이지 기준 앞뒤 2페이지씩) -->
+    <th:block th:each="i : ${#numbers.sequence(
+        T(java.lang.Math).max(0, currentPage - 2),
+        T(java.lang.Math).min(totalPages - 1, currentPage + 2))}">
+        <a th:if="${i != currentPage}"
+           th:href="@{/articles(page=${i}, size=${size}, keyword=${keyword}, sortBy=${sortBy}, direction=${direction})}"
+           th:text="${i + 1}">1</a>
+        <span th:if="${i == currentPage}" class="active" th:text="${i + 1}">1</span>
+    </th:block>
+
+    <!-- 다음 버튼 -->
+    <a th:if="${currentPage < totalPages - 1}"
+       th:href="@{/articles(page=${currentPage + 1}, size=${size}, keyword=${keyword}, sortBy=${sortBy}, direction=${direction})}">다음</a>
+    <span th:if="${currentPage >= totalPages - 1}" class="disabled">다음</span>
+</div>
+
+<br>
+<button type="button" onclick="location.href='/logout'">로그아웃</button>
+<script src="/js/article.js"></script>
+</body>
+</html>
